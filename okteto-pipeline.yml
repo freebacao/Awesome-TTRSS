@@ -1,0 +1,45 @@
+version: "3"
+services:
+  database.postgres:
+    image: sameersbn/postgresql:latest
+    container_name: postgres
+    environment:
+      - PG_PASSWORD=bacaorss # 务必修改密码！
+      - DB_EXTENSION=pg_trgm
+    volumes:
+      - ~/postgres/data/:/var/lib/postgresql/ # 将数据库数据保存到 VPS 的 ~/postgres/data/
+    restart: always
+
+  service.rss:
+    image: wangqiru/ttrss:latest
+    container_name: ttrss
+    ports:
+      - 181:80
+    environment:
+      - SELF_URL_PATH=http://rss.bacao.cf/ # 更改为你自己的域名或者 IP！
+      - DB_HOST=database.postgres # 数据库地址
+      - DB_PORT=5432 # 数据库端口
+      - DB_NAME=bacaodata # 数据库名称
+      - DB_USER=postgres # 数据库用户名
+      - DB_PASS=bacaorss # 务必修改密码！ 两次密码需一致！
+      - ENABLE_PLUGINS=auth_internal,fever # 在系统层面启用的插件名称（为所有用户启用），auth_internal 为必选
+    stdin_open: true
+    tty: true
+    restart: always
+    command: sh -c 'sh /wait-for.sh database.postgres:5432 -- php /configure-db.php && exec s6-svscan /etc/s6/'
+
+  service.mercury: # 在插件页 API 地址填写 `service.mercury:3000` 启用插件
+    image: wangqiru/mercury-parser-api:latest
+    container_name: mercury
+    expose:
+      - 3000
+    restart: always
+
+  service.opencc: # 在插件页 API 地址填写 `service.opencc:3000` 启用插件
+    image: wangqiru/opencc-api-server:latest
+    container_name: opencc
+    environment:
+      NODE_ENV: production
+    expose:
+      - 3000
+    restart: always
