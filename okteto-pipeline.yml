@@ -16,7 +16,7 @@ services:
     ports:
       - 181:80
     environment:
-      - SELF_URL_PATH=https://rss.bacao.cf/ # 更改为你自己的域名或者 IP！
+      - SELF_URL_PATH=https://freebacao.cloud.okteto.net/ # 更改为你自己的域名或者 IP！
       - DB_HOST=database.postgres # 数据库地址
       - DB_PORT=5432 # 数据库端口
       - DB_NAME=bacaodata # 数据库名称
